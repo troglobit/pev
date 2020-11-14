@@ -21,6 +21,7 @@
 #include <sys/time.h>
 
 int pev_init       (void);
+int pev_exit       (void);
 int pev_run        (void);
 
 int pev_sock_add   (int sd, void (*cb)(int, void *), void *arg);

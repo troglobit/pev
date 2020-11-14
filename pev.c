@@ -59,8 +59,10 @@ static LIST_HEAD(, timer) tl = LIST_HEAD_INITIALIZER();
 static int max_fdnum = -1;
 static LIST_HEAD(, sock) sl = LIST_HEAD_INITIALIZER();
 
+volatile sig_atomic_t running;
 
-int nfds(void)
+
+static int nfds(void)
 {
 	return max_fdnum + 1;
 }
@@ -151,14 +153,10 @@ static int socket_poll(struct timeval *timeout)
 	LIST_FOREACH(entry, &sl, link)
 		FD_SET(entry->sd, &fds);
 
+	errno = 0;
 	num = select(nfds(), &fds, NULL, NULL, timeout);
-	if (num <= 0) {
-		/* Log all errors, except when signalled, ignore failures. */
-		if (num < 0 && EINTR != errno)
-//XXX			smclog(LOG_WARNING, "Failed select(): %s", strerror(errno));
-
-		return num;
-	}
+	if (num <= 0)
+		return -1;
 
 	LIST_FOREACH(entry, &sl, link) {
 		if (!FD_ISSET(entry->sd, &fds))
@@ -240,12 +238,14 @@ static int start(struct timespec *now)
 	if (it.it_value.tv_sec < 0)
 		it.it_value.tv_sec = 0;
 
-	if (timer_settime(timer, 0, &it, NULL))
-		return -1;
-//XXX		smclog(LOG_ERR, "Failed starting %d sec period timer, errno %d: %s",
-//		       next->timeout.tv_sec - now->tv_sec, errno, strerror(errno));
+	return timer_settime(timer, 0, &it, NULL);
+}
 
-	return 0;
+static int stop(void)
+{
+	struct itimerspec it = { 0 };
+
+	return timer_settime(timer, 0, &it, NULL);
 }
 
 /* callback for activity on pipe */
@@ -258,7 +258,6 @@ static void run(int sd, void *arg)
 	(void)arg;
 	if (read(sd, &dummy, 1) < 0)
 		return;
-//XXX		smclog(LOG_DEBUG, "Failed read(pipe): %s", strerror(errno));
 
 	clock_gettime(CLOCK_MONOTONIC, &now);
 	LIST_FOREACH_SAFE(entry, &tl, link, tmp) {
@@ -283,13 +282,12 @@ static void handler(int signo)
 	(void)signo;
 	if (write(timerfd[1], "!", 1) < 0)
 		return;
-//XXX		smclog(LOG_DEBUG, "Failed write(pipe): %s", strerror(errno));
 }
 
 /*
  * register signal pipe and callbacks
  */
-int timer_init(void)
+static int timer_init(void)
 {
 	struct sigaction sa;
 
@@ -311,6 +309,16 @@ int timer_init(void)
 		pev_sock_close(timerfd[1]);
 		return -1;
 	}
+
+	return 0;
+}
+
+static int timer_exit(void)
+{
+	stop();
+	timer_delete(timer);
+	pev_sock_close(timerfd[0]);
+	pev_sock_close(timerfd[1]);
 
 	return 0;
 }
@@ -368,12 +376,28 @@ int pev_timer_del(void (*cb)(void *), void *arg)
 
 int pev_init(void)
 {
+	running = 1;
+
 	return timer_init();
+}
+
+int pev_exit(void)
+{
+	running = 0;
+
+	return timer_exit();
 }
 
 int pev_run(void)
 {
-	return socket_poll(NULL);
+	while (running) {
+		if (socket_poll(NULL) < 0) {
+			if (errno == EINTR)
+				continue;
+		}
+	}
+
+	return 0;
 }
 
 /**
