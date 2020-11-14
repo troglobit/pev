@@ -24,7 +24,7 @@ int main(void)
         gettimeofday(&start, NULL);
 
         pev_init();
-        timer_add(TIMEOUT, cb, &start);
+        pev_timer_add(TIMEOUT, cb, &start);
 
         return pev_run();
 }

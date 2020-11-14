@@ -20,17 +20,16 @@
 #include <string.h>
 #include <sys/time.h>
 
-int pev_init (void);
-int pev_run  (void);
+int pev_init       (void);
+int pev_run        (void);
 
-int socket_register(int sd, void (*cb)(int, void *), void *arg);
-int socket_create  (int domain, int type, int proto, void (*cb)(int, void *), void *arg);
-int socket_close   (int sd);
-int socket_poll    (struct timeval *timeout);
+int pev_sock_add   (int sd, void (*cb)(int, void *), void *arg);
+int pev_sock_del   (int sd);
 
-int timer_init (void);
+int pev_sock_open  (int domain, int type, int proto, void (*cb)(int, void *), void *arg);
+int pev_sock_close (int sd);
 
-int timer_add  (int period, void (*cb)(void *), void *arg);
-int timer_del  (void (*cb)(void *), void *arg);
+int pev_timer_add  (int period, void (*cb)(void *), void *arg);
+int pev_timer_del  (void (*cb)(void *), void *arg);
 
 #endif /* PEV_H_ */

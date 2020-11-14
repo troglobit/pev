@@ -68,7 +68,7 @@ int nfds(void)
 /*
  * register socket/fd/pipe created elsewhere, optional callback
  */
-int socket_register(int sd, void (*cb)(int, void *), void *arg)
+int pev_sock_add(int sd, void (*cb)(int, void *), void *arg)
 {
 	struct sock *entry;
 
@@ -91,33 +91,15 @@ int socket_register(int sd, void (*cb)(int, void *), void *arg)
 }
 
 /*
- * create socket, with optional callback for reading inbound data
+ * deregister socket/df/pipe created elsewhere
  */
-int socket_create(int domain, int type, int proto, void (*cb)(int, void *), void *arg)
-{
-	int sd;
-
-	type |= SOCK_CLOEXEC;
-	sd = socket(domain, type, proto);
-	if (sd < 0)
-		return -1;
-
-	if (socket_register(sd, cb, arg) < 0) {
-		close(sd);
-		return -1;
-	}
-
-	return sd;
-}
-
-int socket_close(int sd)
+int pev_sock_del(int sd)
 {
 	struct sock *entry, *tmp;
 
 	LIST_FOREACH_SAFE(entry, &sl, link, tmp) {
 		if (entry->sd == sd) {
 			LIST_REMOVE(entry, link);
-			close(entry->sd);
 			free(entry);
 
 			return 0;
@@ -128,7 +110,38 @@ int socket_close(int sd)
 	return -1;
 }
 
-int socket_poll(struct timeval *timeout)
+/*
+ * create and register socket, with optional callback for reading inbound data
+ */
+int pev_sock_open(int domain, int type, int proto, void (*cb)(int, void *), void *arg)
+{
+	int sd;
+
+	type |= SOCK_CLOEXEC;
+	sd = socket(domain, type, proto);
+	if (sd < 0)
+		return -1;
+
+	if (pev_sock_add(sd, cb, arg) < 0) {
+		close(sd);
+		return -1;
+	}
+
+	return sd;
+}
+
+/*
+ * close and deregister socket created with pev_sock_open()
+ */
+int pev_sock_close(int sd)
+{
+	pev_sock_del(sd);
+	close(sd);
+
+	return 0;
+}
+
+static int socket_poll(struct timeval *timeout)
 {
 	int num;
 	fd_set fds;
@@ -283,9 +296,9 @@ int timer_init(void)
 	if (pipe(timerfd))
 		return -1;
 
-	if (socket_register(timerfd[0], run, NULL) < 0)
+	if (pev_sock_add(timerfd[0], run, NULL) < 0)
 		return -1;
-	if (socket_register(timerfd[1], NULL, NULL) < 0)
+	if (pev_sock_add(timerfd[1], NULL, NULL) < 0)
 		return -1;
 
 	sa.sa_handler = handler;
@@ -294,8 +307,8 @@ int timer_init(void)
 	sigaction(SIGALRM, &sa, NULL);
 
 	if (timer_create(CLOCK_MONOTONIC, NULL, &timer)) {
-		socket_close(timerfd[0]);
-		socket_close(timerfd[1]);
+		pev_sock_close(timerfd[0]);
+		pev_sock_close(timerfd[1]);
 		return -1;
 	}
 
@@ -305,7 +318,7 @@ int timer_init(void)
 /*
  * create periodic timer (seconds)
  */
-int timer_add(int period, void (*cb)(void *), void *arg)
+int pev_timer_add(int period, void (*cb)(void *), void *arg)
 {
 	struct timer *t;
 	struct timespec now;
@@ -338,7 +351,7 @@ int timer_add(int period, void (*cb)(void *), void *arg)
 /*
  * delete a timer
  */
-int timer_del(void (*cb)(void *), void *arg)
+int pev_timer_del(void (*cb)(void *), void *arg)
 {
 	struct timer *entry;
 
