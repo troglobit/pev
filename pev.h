@@ -24,6 +24,9 @@ int pev_init       (void);
 int pev_exit       (void);
 int pev_run        (void);
 
+int pev_sig_add    (int signo, void (*cb)(int, void *), void *arg);
+int pev_sig_del    (int signo);
+
 int pev_sock_add   (int sd, void (*cb)(int, void *), void *arg);
 int pev_sock_del   (int sd);
 

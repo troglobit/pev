@@ -27,6 +27,15 @@
 #include "pev.h"
 #include "queue.h"
 
+struct sig {
+	LIST_ENTRY(sig) link;
+
+	int signo;
+
+	void (*cb)(int, void *arg);
+	void *arg;
+};
+
 struct sock {
 	LIST_ENTRY(sock) link;
 
@@ -52,6 +61,9 @@ struct timer {
 	void *arg;
 };
 
+static LIST_HEAD(, sig) sl = LIST_HEAD_INITIALIZER();
+static int signalfd[2];
+
 static timer_t timer;
 static int timerfd[2];
 static LIST_HEAD(, timer) tl = LIST_HEAD_INITIALIZER();
@@ -61,6 +73,118 @@ static LIST_HEAD(, sock) fl = LIST_HEAD_INITIALIZER();
 
 volatile sig_atomic_t running;
 
+
+static struct sig *sig_find(int signo)
+{
+	struct sig *entry;
+
+	LIST_FOREACH(entry, &sl, link) {
+		if (entry->signo != signo)
+			continue;
+
+		return entry;
+	}
+
+	return NULL;
+}
+
+/* callback for activity on pipe */
+static void sig_cb(int sd, void *arg)
+{
+	struct sig *entry;
+	char signo;
+
+	(void)arg;
+	if (read(sd, &signo, 1) < 0)
+		return;
+
+	entry = sig_find(signo);
+	if (!entry)
+		return;
+
+	if (!entry->cb)
+		return;
+
+	entry->cb(entry->signo, entry->arg);
+}
+
+static int sig_init(void)
+{
+	sigset_t mask;
+
+	if (pipe(signalfd))
+		return -1;
+
+	sigfillset(&mask);
+	sigdelset(&mask, SIGALRM);
+	sigprocmask(SIG_SETMASK, &mask, NULL);
+
+	if (pev_sock_add(signalfd[0], sig_cb, NULL) < 0)
+		return -1;
+	if (pev_sock_add(signalfd[1], NULL, NULL) < 0)
+		return -1;
+
+	return 0;
+}
+
+static int sig_exit(void)
+{
+	sigset_t mask;
+
+	sigemptyset(&mask);
+	sigprocmask(SIG_SETMASK, &mask, NULL);
+
+	return 0;
+}
+
+static void sig_handler(int signo)
+{
+	char buf[1] = { (char)signo };
+
+	while (write(signalfd[1], buf, 1) < 0) {
+		if (errno != EINTR)
+			break;
+	}
+}
+
+static int sig_run(void)
+{
+	struct sig *entry;
+	sigset_t mask;
+
+	sigemptyset(&mask);
+	LIST_FOREACH(entry, &sl, link)
+		sigaddset(&mask, entry->signo);
+
+	return sigprocmask(SIG_UNBLOCK, &mask, NULL);
+}
+
+int pev_sig_add(int signo, void (*cb)(int, void *), void *arg)
+{
+	struct sigaction sa;
+	struct sig *entry;
+
+	if (sig_find(signo)) {
+		errno = EEXIST;
+		return -1;
+	}
+
+	entry = malloc(sizeof(*entry));
+	if (!entry)
+		return -1;
+
+	sa.sa_handler = sig_handler;
+	sa.sa_flags = 0;
+	sigemptyset(&sa.sa_mask);
+	sigaction(signo, &sa, NULL);
+
+	entry->signo = signo;
+	entry->cb    = cb;
+	entry->arg   = arg;
+	LIST_INSERT_HEAD(&sl, entry, link);
+
+	return 0;
+}
 
 static int nfds(void)
 {
@@ -280,8 +404,10 @@ static void run(int sd, void *arg)
 static void handler(int signo)
 {
 	(void)signo;
-	if (write(timerfd[1], "!", 1) < 0)
-		return;
+	while (write(timerfd[1], "!", 1) < 0) {
+		if (errno != EINTR)
+			break;
+	}
 }
 
 /*
@@ -323,22 +449,32 @@ static int timer_exit(void)
 	return 0;
 }
 
+static int timer_run(void)
+{
+	struct timespec now;
+	struct timer *t;
+
+	if (clock_gettime(CLOCK_MONOTONIC, &now) < 0)
+		return -1;
+
+	LIST_FOREACH(t, &tl, link)
+		set(t, &now);
+
+	return start(&now);
+}
+
 /*
  * create periodic timer (seconds)
  */
 int pev_timer_add(int period, void (*cb)(void *), void *arg)
 {
 	struct timer *t;
-	struct timespec now;
 
 	t = find(cb, arg);
 	if (t && t->active) {
 		errno = EEXIST;
 		return -1;
 	}
-
-	if (clock_gettime(CLOCK_MONOTONIC, &now) < 0)
-		return -1;
 
 	t = malloc(sizeof(*t));
 	if (!t)
@@ -349,11 +485,9 @@ int pev_timer_add(int period, void (*cb)(void *), void *arg)
 	t->cb     = cb;
 	t->arg    = arg;
 
-	set(t, &now);
-
 	LIST_INSERT_HEAD(&tl, t, link);
 
-	return start(&now);
+	return 0;
 }
 
 /*
@@ -378,21 +512,27 @@ int pev_init(void)
 {
 	running = 1;
 
-	return timer_init();
+	return sig_init() || timer_init();
 }
 
 int pev_exit(void)
 {
 	running = 0;
 
-	return timer_exit();
+	return sig_exit() || timer_exit();
 }
 
 int pev_run(void)
 {
+	/* Start timer's */
+	timer_run();
+
+	/* Unblock signals */
+	sig_run();
+
 	while (running) {
 		if (socket_poll(NULL) < 0) {
-			if (errno == EINTR)
+			if (errno != EINTR)
 				continue;
 		}
 	}
