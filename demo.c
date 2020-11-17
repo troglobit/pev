@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <signal.h>
 #include <time.h>
 #include <sys/time.h>
 #include "pev.h"
@@ -17,6 +18,14 @@ static void cb(void *arg)
 		printf("Hej\n");
 }
 
+static void br(int signo, void *arg)
+{
+	(void)signo;
+	(void)arg;
+	printf("\ngot sig %d\n", signo);
+	pev_exit();
+}
+
 int main(void)
 {
 	struct timeval start;
@@ -24,6 +33,7 @@ int main(void)
         gettimeofday(&start, NULL);
 
         pev_init();
+	pev_sig_add(SIGINT, br, NULL);
         pev_timer_add(TIMEOUT, cb, &start);
 
         return pev_run();
