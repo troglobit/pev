@@ -57,7 +57,7 @@ static int timerfd[2];
 static LIST_HEAD(, timer) tl = LIST_HEAD_INITIALIZER();
 
 static int max_fdnum = -1;
-static LIST_HEAD(, sock) sl = LIST_HEAD_INITIALIZER();
+static LIST_HEAD(, sock) fl = LIST_HEAD_INITIALIZER();
 
 volatile sig_atomic_t running;
 
@@ -81,7 +81,7 @@ int pev_sock_add(int sd, void (*cb)(int, void *), void *arg)
 	entry->sd  = sd;
 	entry->cb  = cb;
 	entry->arg = arg;
-	LIST_INSERT_HEAD(&sl, entry, link);
+	LIST_INSERT_HEAD(&fl, entry, link);
 
 	fcntl(sd, F_SETFD, fcntl(sd, F_GETFD) | FD_CLOEXEC);
 
@@ -99,7 +99,7 @@ int pev_sock_del(int sd)
 {
 	struct sock *entry, *tmp;
 
-	LIST_FOREACH_SAFE(entry, &sl, link, tmp) {
+	LIST_FOREACH_SAFE(entry, &fl, link, tmp) {
 		if (entry->sd == sd) {
 			LIST_REMOVE(entry, link);
 			free(entry);
@@ -150,7 +150,7 @@ static int socket_poll(struct timeval *timeout)
 	struct sock *entry;
 
 	FD_ZERO(&fds);
-	LIST_FOREACH(entry, &sl, link)
+	LIST_FOREACH(entry, &fl, link)
 		FD_SET(entry->sd, &fds);
 
 	errno = 0;
@@ -158,7 +158,7 @@ static int socket_poll(struct timeval *timeout)
 	if (num <= 0)
 		return -1;
 
-	LIST_FOREACH(entry, &sl, link) {
+	LIST_FOREACH(entry, &fl, link) {
 		if (!FD_ISSET(entry->sd, &fds))
 			continue;
 
