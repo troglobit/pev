@@ -10,10 +10,10 @@ ARCHIVE = $(LIB)($(LIBOBJS))
 
 all: $(EXEC) $(ARCHIVE)
 
-$(EXEC): $(OBJS) $(ARCHIVE)
+$(EXEC): $(OBJS) $(LIB)
 	$(CC) -o $@ $(OBJS) $(LIB) $(LDLIBS)
 
-$(ARCHIVE): $(LIBOBJS)
+$(LIB): $(LIBOBJS)
 	$(AR) $(ARFLAGS) $@ $(LIBOBJS)
 
 clean:
