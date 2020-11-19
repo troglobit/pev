@@ -1,3 +1,6 @@
+CC     ?= cc
+RM     ?= rm -f
+
 EXEC    = demo
 OBJS    = demo.o
 
