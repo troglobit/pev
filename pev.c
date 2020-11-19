@@ -52,12 +52,12 @@ struct sock {
  */
 struct timer {
 	LIST_ENTRY(timer) link;
-	int             active;	/* Set to 0 to delete */
 
 	int             period;	/* period time in seconds */
 	struct timespec timeout;
+	int             active;	/* Set to 0 to delete */
 
-	void (*cb)(void *arg);
+	void (*cb)(int period, void *arg);
 	void *arg;
 };
 
@@ -387,7 +387,7 @@ static void run(int sd, void *arg)
 	LIST_FOREACH_SAFE(entry, &tl, link, tmp) {
 		if (expired(entry, &now)) {
 			if (entry->cb)
-				entry->cb(entry->arg);
+				entry->cb(entry->period, entry->arg);
 			set(entry, &now);
 		}
 
@@ -459,7 +459,7 @@ static int timer_run(void)
 /*
  * create periodic timer (seconds)
  */
-int pev_timer_add(int period, void (*cb)(void *), void *arg)
+int pev_timer_add(int period, void (*cb)(int, void *), void *arg)
 {
 	struct timer *t;
 

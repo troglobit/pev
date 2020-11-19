@@ -6,11 +6,12 @@
 
 #define TIMEOUT 2               /* 2 sec */
 
-static void cb(void *arg)
+static void cb(int period, void *arg)
 {
 	struct timeval *start = (struct timeval *)arg;
         struct timeval now;
 
+	(void)period;
         gettimeofday(&now, NULL);
 	if (now.tv_sec < start->tv_sec + TIMEOUT)
 		fprintf(stderr, "wut?");

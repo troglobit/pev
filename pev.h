@@ -33,7 +33,7 @@ int pev_sock_del   (int sd);
 int pev_sock_open  (int domain, int type, int proto, void (*cb)(int, void *), void *arg);
 int pev_sock_close (int sd);
 
-int pev_timer_add  (int period, void (*cb)(void *), void *arg);
+int pev_timer_add  (int period, void (*cb)(int, void *), void *arg);
 int pev_timer_del  (void (*cb)(void *), void *arg);
 
 #endif /* PEV_H_ */
