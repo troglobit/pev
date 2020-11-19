@@ -18,6 +18,13 @@ You can use it as a library or just include the components into your own
 project.  If you find bugs or have fixes to share, I'd very much like to
 see.
 
+> **Note:** The timer implementation uses `setitimer()` for maximum
+> portability.  Depending on the system, this can potentially cause
+> problems if your application also use `sleep()`, `usleep()`, or
+> `alarm()`, which may all use the same back end implantation in your
+> operating system.  Please check the documentation for your OS for more
+> information on the subject.
+
 Take care!  
  /Joachim :-)
 

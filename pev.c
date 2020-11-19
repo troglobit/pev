@@ -343,7 +343,7 @@ static struct timer *find(void (*cb), void *arg)
 static int start(struct timespec *now)
 {
 	struct timer *next, *entry;
-	struct itimerspec it;
+	struct itimerval it;
 
 	if (LIST_EMPTY(&tl))
 		return -1;
@@ -353,23 +353,23 @@ static int start(struct timespec *now)
 		next = compare(next, entry);
 
 	memset(&it, 0, sizeof(it));
-	it.it_value.tv_sec  = next->timeout.tv_sec - now->tv_sec;
-	it.it_value.tv_nsec = next->timeout.tv_nsec - now->tv_nsec;
-	if (it.it_value.tv_nsec < 0) {
+	it.it_value.tv_sec = next->timeout.tv_sec - now->tv_sec;
+	it.it_value.tv_usec = (next->timeout.tv_nsec - now->tv_nsec) / 1000;
+	if (it.it_value.tv_usec < 0) {
 		it.it_value.tv_sec -= 1;
-		it.it_value.tv_nsec = 1000000000 + it.it_value.tv_nsec;
+		it.it_value.tv_usec = 1000000 + it.it_value.tv_usec;
 	}
 	if (it.it_value.tv_sec < 0)
 		it.it_value.tv_sec = 0;
 
-	return timer_settime(timer, 0, &it, NULL);
+	return setitimer(ITIMER_REAL, &it, NULL);
 }
 
 static int stop(void)
 {
-	struct itimerspec it = { 0 };
+	struct itimerval it = { 0 };
 
-	return timer_settime(timer, 0, &it, NULL);
+	return setitimer(ITIMER_REAL, &it, NULL);
 }
 
 /* callback for activity on pipe */
@@ -430,19 +430,12 @@ static int timer_init(void)
 	sigemptyset(&sa.sa_mask);
 	sigaction(SIGALRM, &sa, NULL);
 
-	if (timer_create(CLOCK_MONOTONIC, NULL, &timer)) {
-		pev_sock_close(timerfd[0]);
-		pev_sock_close(timerfd[1]);
-		return -1;
-	}
-
 	return 0;
 }
 
 static int timer_exit(void)
 {
 	stop();
-	timer_delete(timer);
 	pev_sock_close(timerfd[0]);
 	pev_sock_close(timerfd[1]);
 

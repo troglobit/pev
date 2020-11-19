@@ -1,6 +1,5 @@
 EXEC    = demo
 OBJS    = demo.o
-LDLIBS  = -lrt
 
 LIB	= libpev.a
 ARCHIVE = $(LIB)(pev.o)
