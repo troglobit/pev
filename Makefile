@@ -10,7 +10,7 @@ ARCHIVE = $(LIB)(pev.o)
 all: $(EXEC) $(ARCHIVE)
 
 $(EXEC): $(OBJS) $(ARCHIVE)
-#	$(CC) -o $@ $^
+	$(CC) -o $@ $^ $(LDLIBS)
 
 clean:
 	$(RM) *.o $(LIB) demo
