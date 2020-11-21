@@ -123,7 +123,7 @@ int pev_sig_add(int signo, void (*cb)(int, void *), void *arg)
 		return -1;
 
 	sa.sa_handler = sig_handler;
-	sa.sa_flags = 0;
+	sa.sa_flags = SA_RESTART;
 	sigfillset(&sa.sa_mask);
 	sigaction(signo, &sa, NULL);
 
