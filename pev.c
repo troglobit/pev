@@ -205,7 +205,6 @@ int pev_sock_open(int domain, int type, int proto, void (*cb)(int, void *), void
 {
 	int sd;
 
-	type |= SOCK_CLOEXEC;
 	sd = socket(domain, type, proto);
 	if (sd < 0)
 		return -1;
