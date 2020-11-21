@@ -88,7 +88,7 @@ static void sig_handler(int signo)
 
 	while (write(events[1], buf, 1) < 0) {
 		if (errno != EINTR)
-			break;
+			return;
 	}
 }
 
@@ -420,8 +420,10 @@ static void pev_event(int sd, void *arg)
 	char signo;
 
 	(void)arg;
-	if (read(sd, &signo, 1) < 0)
-		return;
+	while (read(sd, &signo, 1) < 0) {
+		if (errno != EINTR)
+			return;
+	}
 
 	entry = pev_find(PEV_SIG, signo);
 	if (!entry)
