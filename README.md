@@ -26,6 +26,15 @@ fixes to share, please report them using GitHub issues or pull requests.
 > operating system.  Please check the documentation for your OS for more
 > information on the subject.
 
+To build, you may have to set `CC`, to install you must set `prefix`.
+Example:
+
+    make clean
+    make CC=clang
+    make install prefix=/usr/local
+    ...
+    make uninstall prefix=/usr/local
+
 Take care!  
  /Joachim :-)
 
