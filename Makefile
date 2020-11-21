@@ -1,4 +1,5 @@
 CC     ?= cc
+CFLAGS ?= -g -O2
 RM     ?= rm -f
 
 EXEC    = demo

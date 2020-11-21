@@ -1,5 +1,2 @@
-- Reduce code size
-- Reuse data types, e.g. struct sock and sig can be easily merged
-- Reuse code, e.g. timerfd[] and signalfd[] pipe callbacks
 - Document in header file
 - tag + "release"
