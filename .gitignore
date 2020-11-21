@@ -2,3 +2,8 @@
 *.o
 demo
 libpev.a
+.gdb_history
+GPATH
+GRTAGS
+GTAGS
+ID
