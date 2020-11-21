@@ -19,6 +19,15 @@ static void cb(int period, void *arg)
 		printf("Hej\n");
 }
 
+static void nohej(int period, void *arg)
+{
+	int *id = (int *)arg;
+
+	(void)period;
+	pev_timer_del(*id);
+	printf("Killed Hej, kill me with Ctrl-C\n");
+}
+
 static void br(int signo, void *arg)
 {
 	(void)signo;
@@ -30,12 +39,14 @@ static void br(int signo, void *arg)
 int main(void)
 {
 	struct timeval start;
+	int id;
 
         gettimeofday(&start, NULL);
 
         pev_init();
 	pev_sig_add(SIGINT, br, NULL);
-        pev_timer_add(TIMEOUT, cb, &start);
+        id = pev_timer_add(TIMEOUT, cb, &start);
+        pev_timer_add(TIMEOUT * 3, nohej, &id);
 
         return pev_run();
 }
