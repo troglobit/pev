@@ -55,8 +55,7 @@ static LIST_HEAD(, pev) pl = LIST_HEAD_INITIALIZER();
 static int events[2];
 static int max_fdnum = -1;
 static int id = 1;
-
-volatile sig_atomic_t running;
+static int running;
 
 static struct pev *pev_new  (int type, void (*cb)(int, void *), void *arg);
 static struct pev *pev_find (int type, int signo);
