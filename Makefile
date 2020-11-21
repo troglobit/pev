@@ -1,17 +1,14 @@
-VERSION	:= 1.0
-NAME    := pev
-PKG     := $(NAME)-$(VERSION)
-ARCHIVE	:= $(PKG).tar.gz
+VERSION	 = 1.0
+NAME     = pev
+PKG      = $(NAME)-$(VERSION)
+ARCHIVE	 = $(PKG).tar.gz
 
-prefix	?= /usr/local
 incdir   = $(prefix)/include
 libdir   = $(prefix)/lib
 docdir   = $(prefix)/share/doc/$(NAME)
 
-CC    	?= cc
-CFLAGS	?= -g -O2
-RM    	?= rm -f
-INSTALL ?= install
+RM    	 = rm -f
+INSTALL  = install
 
 EXEC   	 = demo
 OBJS   	 = demo.o
