@@ -1,5 +1,5 @@
-Portable Event Library
-======================
+Portable Event Library (PEV)
+============================
 
 This small event library in C is based around `select()`.  The design
 evolved over time in the [SMCRoute][] project, where I wanted to keep
@@ -14,9 +14,10 @@ and, most importantly, *portable* event loop.  So here's code, extracted
 from SMCRoute and free to used under the terms of the very liberal ISC
 license.
 
-You can use it as a library or just include the components into your own
-project.  If you find bugs or have fixes to share, I'd very much like to
-see.
+The event loop consists of two files: `pev.c` and `pev.h`.  You can use
+it as a library or just include the components into your own project.
+See the header file for the API description.  If you find bugs or have
+fixes to share, please report them using GitHub issues or pull requests.
 
 > **Note:** The timer implementation uses `setitimer()` for maximum
 > portability.  Depending on the system, this can potentially cause
