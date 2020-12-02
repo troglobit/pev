@@ -1,3 +1,5 @@
+/* This is free and unencumbered software released into the public domain. */
+
 #include <stdio.h>
 #include <signal.h>
 #include <time.h>
