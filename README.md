@@ -4,13 +4,6 @@ Portable Event Library (PEV)
 This is a small event library in C based around `select()` available
 free for use in the [*public domain*](UNLICENSE).
 
-> Please note, the file `queue.h` distributed as part of this library is
-> licensed under the 3-clause BSD license.  BSD systems likely will not
-> need this file, and can use the one distributed with their operating
-> system, but Linux systems usually come with a C-library that ships an
-> older version of `queue.h` that does not include the `_SAFE` macros,
-> which PEV uses.  Patches to remove this dependency are most welcome :)
-
 
 History and Background
 ----------------------

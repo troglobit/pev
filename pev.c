@@ -12,14 +12,14 @@
 #include <sys/types.h>
 
 #include "pev.h"
-#include "queue.h"
 
 #define PEV_SOCK   1
 #define PEV_TIMER  2
 #define PEV_SIG    3
 
 struct pev {
-	LIST_ENTRY(pev) link;
+	struct pev *prev, *next;
+
 	int id;
 	char type;
 	char active;
@@ -37,7 +37,7 @@ struct pev {
 	void *arg;
 };
 
-static LIST_HEAD(, pev) pl = LIST_HEAD_INITIALIZER();
+struct pev *pl;
 
 static int events[2];
 static int max_fdnum = -1;
@@ -85,7 +85,7 @@ static int sig_run(void)
 	sigset_t mask;
 
 	sigfillset(&mask);
-	LIST_FOREACH(entry, &pl, link) {
+	for (entry = pl; entry; entry = entry->next) {
 		if (entry->type != PEV_SIG)
 			continue;
 
@@ -144,7 +144,7 @@ static void sock_run(fd_set *fds)
 	struct pev *entry;
 
 	FD_ZERO(fds);
-	LIST_FOREACH(entry, &pl, link) {
+	for (entry = pl; entry; entry = entry->next) {
 		if (entry->type != PEV_SOCK)
 			continue;
 
@@ -172,9 +172,9 @@ int pev_sock_add(int sd, void (*cb)(int, void *), void *arg)
 
 int pev_sock_del(int id)
 {
-	struct pev *entry, *tmp;
+	struct pev *entry;
 
-	LIST_FOREACH_SAFE(entry, &pl, link, tmp) {
+	for (entry = pl; entry; entry = entry->next) {
 		if (entry->id == id) {
 			/* Mark for deletion and issue a new run */
 			entry->active = 0;
@@ -224,7 +224,7 @@ static struct pev *timer_ffs(void)
 {
 	struct pev *entry;
 
-	LIST_FOREACH(entry, &pl, link) {
+	for (entry = pl; entry; entry = entry->next) {
 		if (entry->type == PEV_TIMER && entry->active)
 			return entry;
 	}
@@ -256,7 +256,7 @@ static int timer_start(struct timespec *now)
 	if (!next)
 		return -1;
 
-	LIST_FOREACH(entry, &pl, link)
+	for (entry = pl; entry; entry = entry->next)
 		next = timer_compare(next, entry);
 
 	memset(&it, 0, sizeof(it));
@@ -299,7 +299,7 @@ static void timer_run(int signo, void *arg)
 	(void)arg;
 	clock_gettime(CLOCK_MONOTONIC, &now);
 
-	LIST_FOREACH(entry, &pl, link) {
+	for (entry = pl; entry; entry = entry->next) {
 		if (!timer_expired(entry, &now))
 			continue;
 
@@ -365,7 +365,9 @@ static struct pev *pev_new(int type, void (*cb)(int, void *), void *arg)
 	entry->cb  = cb;
 	entry->arg = arg;
 
-	LIST_INSERT_HEAD(&pl, entry, link);
+	entry->next = pl;
+	entry->prev = NULL;
+	pl = entry;
 
 	return entry;
 }
@@ -374,7 +376,7 @@ static struct pev *pev_find(int type, int signo)
 {
 	struct pev *entry;
 
-	LIST_FOREACH(entry, &pl, link) {
+	for (entry = pl; entry; entry = entry->next) {
 		if (entry->type != type)
 			continue;
 
@@ -390,13 +392,22 @@ static struct pev *pev_find(int type, int signo)
 
 static void pev_cleanup(void)
 {
-	struct pev *entry, *tmp;
+	struct pev *entry, *next, *prev;
 
-	LIST_FOREACH_SAFE(entry, &pl, link, tmp) {
+	for (entry = pl; entry; entry = next) {
+		next = entry->next;
+		prev = entry->prev;
+
 		if (entry->active)
 			continue;
 
-		LIST_REMOVE(entry, link);
+		if (next)
+			next->prev = prev;
+		if (prev)
+			prev->next = next;
+		else
+			pl = next;
+
 		free(entry);
 	}
 }
@@ -460,7 +471,7 @@ int pev_run(void)
 		if (num <= 0)
 			continue;
 
-		LIST_FOREACH(entry, &pl, link) {
+		for (entry = pl; entry; entry = entry->next) {
 			if (!FD_ISSET(entry->sd, &fds))
 				continue;
 
