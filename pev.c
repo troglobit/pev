@@ -366,6 +366,8 @@ static struct pev *pev_new(int type, void (*cb)(int, void *), void *arg)
 
 	entry->next = pl;
 	entry->prev = NULL;
+	if (entry->next)
+		entry->next->prev = entry;
 	pl = entry;
 
 	return entry;
