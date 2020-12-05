@@ -493,6 +493,9 @@ int pev_run(void)
 			continue;
 
 		for (entry = pl; entry; entry = entry->next) {
+			if (entry->type != PEV_SOCK)
+				continue;
+
 			if (!FD_ISSET(entry->sd, &fds))
 				continue;
 
