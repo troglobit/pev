@@ -249,8 +249,8 @@ static struct pev *timer_compare(struct pev *a, struct pev *b)
 
 static int timer_start(struct timespec *now)
 {
+	struct itimerval it = { 0 };
 	struct pev *next, *entry;
-	struct itimerval it;
 
 	next = timer_ffs();
 	if (!next)
@@ -259,7 +259,6 @@ static int timer_start(struct timespec *now)
 	for (entry = pl; entry; entry = entry->next)
 		next = timer_compare(next, entry);
 
-	memset(&it, 0, sizeof(it));
 	it.it_value.tv_sec = next->timeout.tv_sec - now->tv_sec;
 	it.it_value.tv_usec = (next->timeout.tv_nsec - now->tv_nsec) / 1000;
 	if (it.it_value.tv_usec < 0) {
