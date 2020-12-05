@@ -269,7 +269,7 @@ static int timer_start(struct timespec *now)
 	for (entry = pl; entry; entry = entry->next)
 		next = timer_compare(next, entry);
 
-	it.it_value.tv_sec = next->timeout.tv_sec - now->tv_sec;
+	it.it_value.tv_sec  =  next->timeout.tv_sec  - now->tv_sec;
 	it.it_value.tv_usec = (next->timeout.tv_nsec - now->tv_nsec) / 1000;
 	if (it.it_value.tv_usec < 0) {
 		it.it_value.tv_sec -= 1;
@@ -283,18 +283,13 @@ static int timer_start(struct timespec *now)
 
 static int timer_expired(struct pev *t, struct timespec *now)
 {
-	long rounded;
-
 	if (t->type != PEV_TIMER)
 		return 0;
-
-	rounded = now->tv_nsec + 250000000;
-	rounded = rounded > 999999999 ? 999999999 : rounded;
 
 	if (t->timeout.tv_sec < now->tv_sec)
 		return 1;
 
-	if (t->timeout.tv_sec == now->tv_sec && t->timeout.tv_nsec <= rounded)
+	if (t->timeout.tv_sec == now->tv_sec && t->timeout.tv_nsec <= now->tv_nsec)
 		return 1;
 
 	return 0;
@@ -309,11 +304,19 @@ static void timer_run(int signo, void *arg)
 	clock_gettime(CLOCK_MONOTONIC, &now);
 
 	for (entry = pl; entry; entry = entry->next) {
+		unsigned int sec, usec;
+
 		if (!timer_expired(entry, &now))
 			continue;
 
-		entry->timeout.tv_sec  = now.tv_sec + entry->period;
-		entry->timeout.tv_nsec = now.tv_nsec;
+		sec  = entry->period / 1000000;
+		usec = entry->period % 1000000;
+		entry->timeout.tv_sec  = now.tv_sec + sec;
+		entry->timeout.tv_nsec = now.tv_nsec + (usec * 1000);
+		if (entry->timeout.tv_nsec > 1000000000) {
+			entry->timeout.tv_nsec = entry->timeout.tv_nsec % 1000000000;
+			entry->timeout.tv_sec += entry->timeout.tv_nsec / 1000000000;
+		}
 
 		if (signo && entry->cb)
 			entry->cb(entry->period, entry->arg);

@@ -1,4 +1,4 @@
-VERSION	 = 1.2
+VERSION	 = 1.3
 NAME     = pev
 PKG      = $(NAME)-$(VERSION)
 ARCHIVE	 = $(PKG).tar.gz

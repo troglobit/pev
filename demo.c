@@ -6,7 +6,7 @@
 #include <sys/time.h>
 #include "pev.h"
 
-#define TIMEOUT 2               /* 2 sec */
+#define TIMEOUT 2000000		/* 2 sec */
 
 static void cb(int period, void *arg)
 {
@@ -15,7 +15,7 @@ static void cb(int period, void *arg)
 
 	(void)period;
         gettimeofday(&now, NULL);
-	if (now.tv_sec < start->tv_sec + TIMEOUT)
+	if (now.tv_sec < start->tv_sec + (TIMEOUT / 1000000))
 		fprintf(stderr, "wut?");
 	else
 		printf("Hej\n");

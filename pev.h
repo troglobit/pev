@@ -50,6 +50,8 @@ int pev_sock_close (int id);
  * Periodic timers use SIGALRM via setitimer() API, may affect use of
  * sleep(), usleep(), and alarm() APIs.  See your respective OS for
  * details.  Otherwise works like the other pev APIs, returns id.
+ * The period argument is in microseconds.  Scheduling granularity
+ * is subject to limits in your operating system timer resolution.
  */
 int pev_timer_add  (int period, void (*cb)(int, void *), void *arg);
 int pev_timer_del  (int id);
