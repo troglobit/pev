@@ -156,6 +156,11 @@ int pev_sock_add(int sd, void (*cb)(int, void *), void *arg)
 {
 	struct pev *entry;
 
+	if (sd < 0) {
+		errno = EINVAL;
+		return -1;
+	}
+
 	entry = pev_new(PEV_SOCK, cb, arg);
 	if (!entry)
 		return -1;
@@ -191,6 +196,11 @@ int pev_sock_del(int id)
 int pev_sock_open(int domain, int type, int proto, void (*cb)(int, void *), void *arg)
 {
 	int sd;
+
+	if (!cb) {
+		errno = EINVAL;
+		return -1;
+	}
 
 	sd = socket(domain, type, proto);
 	if (sd < 0)
@@ -328,6 +338,11 @@ int pev_timer_add(int period, void (*cb)(int, void *), void *arg)
 {
 	struct pev *entry;
 
+	if (period <= 0) {
+		errno = EINVAL;
+		return -1;
+	}
+
 	entry = pev_new(PEV_TIMER, cb, arg);
 	if (!entry)
 		return -1;
@@ -352,6 +367,11 @@ int pev_timer_del(int id)
 static struct pev *pev_new(int type, void (*cb)(int, void *), void *arg)
 {
 	struct pev *entry;
+
+	if (!cb) {
+		errno = EINVAL;
+		return NULL;
+	}
 
 	entry = malloc(sizeof(*entry));
 	if (!entry)
