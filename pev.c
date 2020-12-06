@@ -471,8 +471,14 @@ int pev_init(void)
 
 int pev_exit(void)
 {
+	struct pev *entry;
+
 	pev_sock_close(events[0]);
 	pev_sock_close(events[1]);
+
+	for (entry = pl; entry; entry = entry->next)
+		entry->active = 0;
+
 	running = 0;
 
 	return sig_exit() || timer_exit();
@@ -508,6 +514,7 @@ int pev_run(void)
 
 		pev_cleanup();
 	}
+	pev_cleanup();
 
 	return 0;
 }
