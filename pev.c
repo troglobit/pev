@@ -376,7 +376,7 @@ static struct pev *pev_new(int type, void (*cb)(int, void *), void *arg)
 		return NULL;
 	}
 
-	entry = malloc(sizeof(*entry));
+	entry = calloc(1, sizeof(*entry));
 	if (!entry)
 		return NULL;
 
