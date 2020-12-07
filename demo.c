@@ -35,7 +35,7 @@ static void br(int signo, void *arg)
 	(void)signo;
 	(void)arg;
 	printf("\ngot sig %d\n", signo);
-	pev_exit();
+	pev_exit(10);
 }
 
 int main(void)
