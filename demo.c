@@ -16,18 +16,38 @@ static void cb(int period, void *arg)
 	(void)period;
         gettimeofday(&now, NULL);
 	if (now.tv_sec < start->tv_sec + (TIMEOUT / 1000000))
-		fprintf(stderr, "wut?");
+		puts("wut?");
 	else
-		printf("Hej\n");
+		puts("Hej");
+}
+
+static void wow(int period, void *arg)
+{
+	putchar(' ');
 }
 
 static void nohej(int period, void *arg)
 {
+	static int once = 1;
 	int *id = (int *)arg;
 
 	(void)period;
-	pev_timer_del(*id);
-	printf("Killed Hej, kill me with Ctrl-C\n");
+	if (once) {
+		pev_timer_del(*id);
+		pev_timer_add(50, wow, NULL);
+		once = 0;
+	}
+	puts("Killed Hej, kill me with Ctrl-C");
+}
+
+static void greg(int period, void *arg)
+{
+	putchar('*');
+}
+
+static void dotty(int period, void *arg)
+{
+	putchar('.');
 }
 
 static void br(int signo, void *arg)
@@ -43,12 +63,17 @@ int main(void)
 	struct timeval start;
 	int id;
 
+	setvbuf(stdout, NULL, _IONBF, 0);
         gettimeofday(&start, NULL);
 
         pev_init();
 	pev_sig_add(SIGINT, br, NULL);
         id = pev_timer_add(TIMEOUT, cb, &start);
         pev_timer_add(TIMEOUT * 3, nohej, &id);
+
+	/* sub-second timers, to verify timer impl. */
+        pev_timer_add(100000, dotty, NULL);
+        pev_timer_add(500000, greg, NULL);
 
         return pev_run();
 }
