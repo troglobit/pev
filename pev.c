@@ -276,8 +276,12 @@ static int timer_start(struct timespec *now)
 		it.it_value.tv_sec -= 1;
 		it.it_value.tv_usec = 1000000 + it.it_value.tv_usec;
 	}
+
+	/* Sanity check resulting timeout, prevent disabling timer */
 	if (it.it_value.tv_sec < 0)
 		it.it_value.tv_sec = 0;
+	if (it.it_value.tv_sec == 0 && it.it_value.tv_usec < 1)
+		it.it_value.tv_usec = 1;
 
 	return setitimer(ITIMER_REAL, &it, NULL);
 }
