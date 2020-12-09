@@ -282,15 +282,16 @@ static int timer_start(struct timespec *now)
 	return setitimer(ITIMER_REAL, &it, NULL);
 }
 
-static int timer_expired(struct pev *t, struct timespec *now)
+static int timer_expired(struct pev *entry, struct timespec *now)
 {
-	if (t->type != PEV_TIMER)
+	if (entry->type != PEV_TIMER || !entry->active)
 		return 0;
 
-	if (t->timeout.tv_sec < now->tv_sec)
+	if (entry->timeout.tv_sec < now->tv_sec)
 		return 1;
 
-	if (t->timeout.tv_sec == now->tv_sec && t->timeout.tv_nsec <= now->tv_nsec)
+	if (entry->timeout.tv_sec == now->tv_sec &&
+	    entry->timeout.tv_nsec <= now->tv_nsec)
 		return 1;
 
 	return 0;
