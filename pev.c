@@ -248,12 +248,12 @@ static struct pev *timer_compare(struct pev *a, struct pev *b)
 	if (b->type != PEV_TIMER || !b->active)
 		return a;
 
-	if (a->timeout.tv_sec <= b->timeout.tv_sec) {
-		if (a->timeout.tv_nsec <= b->timeout.tv_nsec)
-			return a;
+	if (a->timeout.tv_sec < b->timeout.tv_sec)
+		return a;
 
-		return b;
-	}
+	if (a->timeout.tv_sec == b->timeout.tv_sec &&
+	    a->timeout.tv_nsec <= b->timeout.tv_nsec)
+		return a;
 
 	return b;
 }
