@@ -363,12 +363,7 @@ int pev_timer_add(int period, void (*cb)(int, void *), void *arg)
 
 int pev_timer_del(int id)
 {
-	int rc;
-
-	rc = pev_sock_del(id);
-	timer_run(0, NULL);
-
-	return rc;
+	return pev_sock_del(id);
 }
 
 /******************************* GENERIC ******************************/
