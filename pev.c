@@ -357,6 +357,7 @@ int pev_timer_add(int period, void (*cb)(int, void *), void *arg)
 		return -1;
 
 	entry->period = period;
+	entry->active++;
 
 	return entry->id;
 }
@@ -486,17 +487,34 @@ int pev_exit(int rc)
 	return sig_exit() || timer_exit();
 }
 
+static void pev_check(fd_set *fds)
+{
+	struct pev *entry;
+	int trestart = 0;
+
+	sig_run();
+	sock_run(fds);
+	pev_cleanup();
+
+	for (entry = pl; entry; entry = entry->next) {
+		if (entry->type == PEV_TIMER && entry->active > 1) {
+			entry->active = 1;
+			trestart = 1;
+		}
+	}
+
+	if (trestart)
+		timer_run(0, NULL);
+}
+
 int pev_run(void)
 {
 	struct pev *entry;
 	fd_set fds;
 	int num;
 
-	timer_run(0, NULL);
-
 	while (running) {
-		sig_run();
-		sock_run(&fds);
+		pev_check(&fds);
 
 		errno = 0;
 		num = select(nfds(), &fds, NULL, NULL, NULL);
@@ -513,8 +531,6 @@ int pev_run(void)
 			if (entry->cb)
 				entry->cb(entry->sd, entry->arg);
 		}
-
-		pev_cleanup();
 	}
 	pev_cleanup();
 
