@@ -316,8 +316,8 @@ static void timer_run(int signo, void *arg)
 		entry->timeout.tv_sec  = now.tv_sec + sec;
 		entry->timeout.tv_nsec = now.tv_nsec + (usec * 1000);
 		if (entry->timeout.tv_nsec > 1000000000) {
-			entry->timeout.tv_nsec = entry->timeout.tv_nsec % 1000000000;
-			entry->timeout.tv_sec += entry->timeout.tv_nsec / 1000000000;
+			entry->timeout.tv_sec++;
+			entry->timeout.tv_nsec -= 1000000000;
 		}
 
 		if (signo && entry->cb)
