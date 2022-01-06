@@ -310,14 +310,16 @@ static int timer_expired(struct pev *entry, struct timespec *now)
 
 static void timer_run(int signo, void *arg)
 {
+	struct pev *entry, *next;
 	struct timespec now;
-	struct pev *entry;
 
 	(void)arg;
 	clock_gettime(CLOCK_MONOTONIC, &now);
 
-	for (entry = pl; entry; entry = entry->next) {
+	for (entry = pl; entry; entry = next) {
 		unsigned int sec, usec;
+
+		next = entry->next;
 
 		if (!timer_expired(entry, &now))
 			continue;
@@ -516,7 +518,7 @@ static void pev_check(fd_set *fds)
 
 int pev_run(void)
 {
-	struct pev *entry;
+	struct pev *entry, *next;
 	fd_set fds;
 	int num;
 
@@ -528,7 +530,9 @@ int pev_run(void)
 		if (num <= 0)
 			continue;
 
-		for (entry = pl; entry; entry = entry->next) {
+		for (entry = pl; entry; entry = next) {
+			next = entry->next;
+
 			if (entry->type != PEV_SOCK)
 				continue;
 
