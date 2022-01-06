@@ -10,7 +10,7 @@ docdir   = $(prefix)/share/doc/$(NAME)
 RM    	 = rm -f
 INSTALL  = install
 
-EXEC   	 = demo one
+EXEC   	 = demo example
 
 LIB    	 = libpev.a
 LDLIBS	+= $(LIB)

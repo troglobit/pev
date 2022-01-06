@@ -1,7 +1,7 @@
 *~
 *.o
 demo
-one
+example
 libpev.a
 .gdb_history
 GPATH

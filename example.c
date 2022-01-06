@@ -2,11 +2,9 @@
 
 #include <stdio.h>
 #include <signal.h>
-#include <time.h>
-#include <sys/time.h>
 #include "pev.h"
 
-#define TIMEOUT 1000000		/* 1 sec */
+#define TIMEOUT 500000		/* 0.5 sec */
 
 static void cb(int timeout, void *arg)
 {
@@ -16,23 +14,16 @@ static void cb(int timeout, void *arg)
 
 static void br(int signo, void *arg)
 {
-	(void)signo;
-	(void)arg;
 	pev_exit(10);
 }
 
 int main(void)
 {
-	struct timeval start;
-
-	setvbuf(stdout, NULL, _IONBF, 0);
-        gettimeofday(&start, NULL);
-
-        pev_init();
+	pev_init();
 	pev_sig_add(SIGINT, br, NULL);
-        pev_timer_add(TIMEOUT, 0, cb, NULL);
+	pev_timer_add(TIMEOUT, 0, cb, NULL);
 
-        return pev_run();
+	return pev_run();
 }
 
 /**
