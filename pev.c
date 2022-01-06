@@ -33,7 +33,7 @@ struct pev {
 		};
 	};
 
-	void (*cb)(int period, void *arg);
+	void (*cb)(int, void *);
 	void *arg;
 };
 
