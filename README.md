@@ -20,6 +20,51 @@ fixes to share, please report them using [GitHub issues][] or, preferably,
 [pull requests][].
 
 
+Example
+-------
+
+```C
+#include <stdio.h>
+#include <signal.h>
+#include "pev.h"
+
+#define TIMEOUT 500000      /* 0.5 sec */
+
+static void cb(int timeout, void *arg)
+{
+        printf("Hej %d\n", timeout);
+        pev_timer_add(timeout + TIMEOUT, 0, cb, NULL);
+}
+
+static void br(int signo, void *arg)
+{
+        pev_exit(10);
+}
+
+int main(void)
+{
+        pev_init();
+        pev_sig_add(SIGINT, br, NULL);
+        pev_timer_add(TIMEOUT, 0, cb, NULL);
+
+        return pev_run();
+}
+```
+
+Gives the following output:
+
+```sh
+$ gcc -I. -o example example.c pev.c
+$ ./example
+Hej 500000
+Hej 1000000
+Hej 1500000
+Hej 2000000
+Hej 2500000
+^C
+```
+
+
 Implementation Notes
 --------------------
 
