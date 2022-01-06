@@ -11,10 +11,10 @@
 static void cb(int period, void *arg)
 {
 	struct timeval *start = (struct timeval *)arg;
-        struct timeval now;
+	struct timeval now;
 
 	(void)period;
-        gettimeofday(&now, NULL);
+	gettimeofday(&now, NULL);
 	if (now.tv_sec < start->tv_sec + (TIMEOUT / 1000000))
 		puts("wut?");
 	else
@@ -64,18 +64,18 @@ int main(void)
 	int id;
 
 	setvbuf(stdout, NULL, _IONBF, 0);
-        gettimeofday(&start, NULL);
+	gettimeofday(&start, NULL);
 
-        pev_init();
+	pev_init();
 	pev_sig_add(SIGINT, br, NULL);
-        id = pev_timer_add(0, TIMEOUT, cb, &start);
-        pev_timer_add(0, TIMEOUT * 3, nohej, &id);
+	id = pev_timer_add(0, TIMEOUT, cb, &start);
+	pev_timer_add(0, TIMEOUT * 3, nohej, &id);
 
 	/* sub-second timers, to verify timer impl. */
-        pev_timer_add(0, 100000, dotty, NULL);
-        pev_timer_add(0, 500000, greg, NULL);
+	pev_timer_add(0, 100000, dotty, NULL);
+	pev_timer_add(0, 500000, greg, NULL);
 
-        return pev_run();
+	return pev_run();
 }
 
 /**
