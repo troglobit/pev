@@ -8,9 +8,10 @@ free for use in the [*public domain*](UNLICENSE).
 Upgrade Warnings
 ----------------
 
-**NOTE:**
   * v1.3 changes timer resolution from 1 second to 1 microsecond
   * v1.5 changes timer API to add support for one-shot timers
+
+See [ChangeLog](ChangeLog.md) for details.
 
 
 The Code
