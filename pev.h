@@ -51,11 +51,21 @@ int pev_sock_close (int id);
 /*
  * Periodic timers use SIGALRM via setitimer() API, may affect use of
  * sleep(), usleep(), and alarm() APIs.  See your respective OS for
- * details.  Otherwise works like the other pev APIs, returns id.
- * The period argument is in microseconds.  Scheduling granularity
- * is subject to limits in your operating system timer resolution.
+ * details.  Otherwise it works like the other pev APIs, returns id.
+ * The timeout and period arguments are in microseconds.
+ *
+ * For one-shot timers, set perid = 0 and timeout to the delay before
+ * the callback should be called.
+ *
+ * For periodic timers, set period != 0.  The timeout may be set to
+ * zero (timeout=0) for periodic tasks, this means the first call will
+ * be after period milliseconds.  The timeout value is only used for
+ * the first call.
+ *
+ * Please note, scheduling granularity is subject to limits in your
+ * operating system timer resolution.
  */
-int pev_timer_add  (int period, void (*cb)(int, void *), void *arg);
+int pev_timer_add  (int timeout, int period, void (*cb)(int, void *), void *arg);
 int pev_timer_del  (int id);
 
 #endif /* PEV_H_ */

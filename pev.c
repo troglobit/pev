@@ -28,6 +28,7 @@ struct pev {
 		int sd;
 		int signo;
 		struct {
+			int timeout;
 			int period;
 			struct timespec expiry;
 		};
@@ -318,14 +319,29 @@ static void timer_run(int signo, void *arg)
 
 	for (entry = pl; entry; entry = next) {
 		unsigned int sec, usec;
+		int timeout;
 
 		next = entry->next;
 
 		if (!timer_expired(entry, &now))
 			continue;
 
-		sec  = entry->period / 1000000;
-		usec = entry->period % 1000000;
+		if (entry->timeout)
+			timeout = entry->timeout;
+		else
+			timeout = entry->period;
+
+		if (signo && entry->cb) {
+			entry->cb(timeout, entry->arg);
+			if (!entry->period) {
+				/* expire one-shot timer */
+				entry->active = 0;
+				continue;
+			}
+		}
+
+		sec  = timeout / 1000000;
+		usec = timeout % 1000000;
 		entry->expiry.tv_sec  = now.tv_sec + sec;
 		entry->expiry.tv_nsec = now.tv_nsec + (usec * 1000);
 		if (entry->expiry.tv_nsec > 1000000000) {
@@ -333,8 +349,6 @@ static void timer_run(int signo, void *arg)
 			entry->expiry.tv_nsec -= 1000000000;
 		}
 
-		if (signo && entry->cb)
-			entry->cb(entry->period, entry->arg);
 	}
 
 	timer_start(&now);
@@ -352,11 +366,11 @@ static int timer_exit(void)
 	return setitimer(ITIMER_REAL, &it, NULL);
 }
 
-int pev_timer_add(int period, void (*cb)(int, void *), void *arg)
+int pev_timer_add(int timeout, int period, void (*cb)(int, void *), void *arg)
 {
 	struct pev *entry;
 
-	if (period <= 0) {
+	if (timeout <= 0 && period <= 0) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -365,7 +379,8 @@ int pev_timer_add(int period, void (*cb)(int, void *), void *arg)
 	if (!entry)
 		return -1;
 
-	entry->period = period;
+	entry->timeout = timeout;
+	entry->period  = period;
 	entry->active++;
 
 	return entry->id;

@@ -34,7 +34,7 @@ static void nohej(int period, void *arg)
 	(void)period;
 	if (once) {
 		pev_timer_del(*id);
-		pev_timer_add(50, wow, NULL);
+		pev_timer_add(0, 50, wow, NULL);
 		once = 0;
 	}
 	puts("Killed Hej, kill me with Ctrl-C");
@@ -68,12 +68,12 @@ int main(void)
 
         pev_init();
 	pev_sig_add(SIGINT, br, NULL);
-        id = pev_timer_add(TIMEOUT, cb, &start);
-        pev_timer_add(TIMEOUT * 3, nohej, &id);
+        id = pev_timer_add(0, TIMEOUT, cb, &start);
+        pev_timer_add(0, TIMEOUT * 3, nohej, &id);
 
 	/* sub-second timers, to verify timer impl. */
-        pev_timer_add(100000, dotty, NULL);
-        pev_timer_add(500000, greg, NULL);
+        pev_timer_add(0, 100000, dotty, NULL);
+        pev_timer_add(0, 500000, greg, NULL);
 
         return pev_run();
 }
