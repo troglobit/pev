@@ -4,8 +4,10 @@ Portable Event Library (PEV)
 This is a small event library in C based around `select()` available
 free for use in the [*public domain*](UNLICENSE).
 
-> **NOTE:** v1.5 changes timer API to add support for one-shot timers.
->           v1.3 changes timer resolution from 1 second to 1 microsecond.
+> **NOTE:**
+>
+>   * v1.5 changes timer API to add support for one-shot timers
+>   * v1.3 changes timer resolution from 1 second to 1 microsecond
 
 
 The Code
