@@ -11,17 +11,16 @@ RM    	 = rm -f
 INSTALL  = install
 
 EXEC   	 = demo
-OBJS   	 = demo.o
 
 LIB    	 = libpev.a
+LDLIBS	+= $(LIB)
 LIBINC   = pev.h
 LIBOBJS	 = pev.o
 DOCFILES = README.md LICENSE
 
 all: $(EXEC)
 
-$(EXEC): $(OBJS) $(LIB)
-	$(CC) -o $@ $(OBJS) $(LIB) $(LDLIBS)
+$(EXEC): $(LIB)
 
 $(LIB): $(LIBOBJS)
 	$(AR) $(ARFLAGS) $@ $(LIBOBJS)
