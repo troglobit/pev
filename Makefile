@@ -13,6 +13,7 @@ INSTALL  = install
 EXEC   	 = demo example
 
 LIB    	 = libpev.a
+CFLAGS  += -W -Wall -Wextra -Wno-unused-parameter
 LDLIBS	+= $(LIB)
 LIBINC   = pev.h
 LIBOBJS	 = pev.o
