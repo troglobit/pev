@@ -24,7 +24,6 @@ jobs:
       MAKEFLAGS: -j3
       CC: ${{ matrix.compiler }}
     steps:
-      - name: Install dependencies
       - uses: actions/checkout@v2
       - name: Build
         run: |
