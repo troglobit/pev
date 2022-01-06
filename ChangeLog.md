@@ -23,6 +23,7 @@ Support for one-shot timers, causes incompatible API change.
     the descriptors of the parent process.  On failure, `pev_sock_add()`
     now returns error, which must be dealt with
   * Safely iterate over all events, callbacks may add or remove events
+  * Fix install target, looked for missing file LICENSE
 
 
 [v1.4][] - 2020-11-21
