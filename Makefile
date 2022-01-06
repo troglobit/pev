@@ -16,7 +16,7 @@ LIB    	 = libpev.a
 LDLIBS	+= $(LIB)
 LIBINC   = pev.h
 LIBOBJS	 = pev.o
-DOCFILES = README.md LICENSE
+DOCFILES = README.md UNLICENSE
 
 all: $(EXEC)
 
