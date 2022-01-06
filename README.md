@@ -1,5 +1,6 @@
 Portable Event Library (PEV)
 ============================
+[![License Badge][]][License] [![GitHub Status][]][GitHub]
 
 This is a small event library in C based around `select()` available
 free for use in the [*public domain*](UNLICENSE).
@@ -117,3 +118,7 @@ Take care!
 [SMCRoute]: https://github.com/troglobit/SMCRoute
 [GitHub issues]: https://github.com/troglobit/pev/issues
 [pull requests]: https://github.com/troglobit/pev/pulls
+[License]:       https://unlicense.org/
+[License Badge]: https://img.shields.io/badge/License-Unlicense-blue.svg
+[GitHub]:        https://github.com/troglobit/pev/actions/workflows/build.yml/
+[GitHub Status]: https://github.com/troglobit/pev/actions/workflows/build.yml/badge.svg
