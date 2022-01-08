@@ -51,26 +51,6 @@ static struct pev *pev_find (int type, int signo);
 
 /******************************* SIGNALS ******************************/
 
-static int sig_init(void)
-{
-	sigset_t mask;
-
-	sigfillset(&mask);
-	sigprocmask(SIG_BLOCK, &mask, NULL);
-
-	return 0;
-}
-
-static int sig_exit(void)
-{
-	sigset_t mask;
-
-	sigfillset(&mask);
-	sigprocmask(SIG_UNBLOCK, &mask, NULL);
-
-	return 0;
-}
-
 static void sig_handler(int signo)
 {
 	char buf[1] = { (char)signo };
@@ -81,25 +61,9 @@ static void sig_handler(int signo)
 	}
 }
 
-static int sig_run(void)
-{
-	struct pev *entry;
-	sigset_t mask;
-
-	sigfillset(&mask);
-	for (entry = pl; entry; entry = entry->next) {
-		if (entry->type != PEV_SIG)
-			continue;
-
-		sigdelset(&mask, entry->signo);
-	}
-
-	return sigprocmask(SIG_SETMASK, &mask, NULL);
-}
-
 int pev_sig_add(int signo, void (*cb)(int, void *), void *arg)
 {
-	struct sigaction sa;
+	struct sigaction sa = { 0 };
 	struct pev *entry;
 
 	if (pev_find(PEV_SIG, signo)) {
@@ -113,7 +77,6 @@ int pev_sig_add(int signo, void (*cb)(int, void *), void *arg)
 
 	sa.sa_handler = sig_handler;
 	sa.sa_flags = SA_RESTART;
-	sigfillset(&sa.sa_mask);
 	sigaction(signo, &sa, NULL);
 
 	entry->signo = signo;
@@ -492,7 +455,7 @@ int pev_init(void)
 
 	running = 1;
 
-	return sig_init() || timer_init();
+	return timer_init();
 }
 
 int pev_exit(int rc)
@@ -508,7 +471,7 @@ int pev_exit(int rc)
 	running = 0;
 	status = rc;
 
-	return sig_exit() || timer_exit();
+	return timer_exit();
 }
 
 static void pev_check(fd_set *fds)
@@ -516,7 +479,6 @@ static void pev_check(fd_set *fds)
 	struct pev *entry;
 	int trestart = 0;
 
-	sig_run();
 	sock_run(fds);
 	pev_cleanup();
 
