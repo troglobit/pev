@@ -207,7 +207,7 @@ static struct pev *timer_ffs(void)
 	struct pev *entry;
 
 	for (entry = pl; entry; entry = entry->next) {
-		if (entry->type == PEV_TIMER && entry->active)
+		if (entry->type == PEV_TIMER && entry->active > 0)
 			return entry;
 	}
 
@@ -216,7 +216,7 @@ static struct pev *timer_ffs(void)
 
 static struct pev *timer_compare(struct pev *a, struct pev *b)
 {
-	if (b->type != PEV_TIMER || !b->active)
+	if (b->type != PEV_TIMER || b->active < 1)
 		return a;
 
 	if (a->expiry.tv_sec < b->expiry.tv_sec)
@@ -259,7 +259,7 @@ static int timer_start(struct timespec *now)
 
 static int timer_expired(struct pev *entry, struct timespec *now)
 {
-	if (entry->type != PEV_TIMER || !entry->active)
+	if (entry->type != PEV_TIMER || entry->active < 1)
 		return 0;
 
 	if (entry->expiry.tv_sec < now->tv_sec)
@@ -285,6 +285,8 @@ static void timer_run(int signo, void *arg)
 		int timeout;
 
 		next = entry->next;
+		if (entry->type != PEV_TIMER)
+			continue;
 
 		if (!timer_expired(entry, &now))
 			continue;
@@ -295,10 +297,11 @@ static void timer_run(int signo, void *arg)
 			timeout = entry->period;
 
 		if (signo && entry->cb) {
+			entry->timeout = 0;
+
 			entry->cb(timeout, entry->arg);
-			if (!entry->period) {
-				/* expire one-shot timer */
-				entry->active = 0;
+			if (!entry->period && !entry->timeout) {
+				entry->active = -1;
 				continue;
 			}
 		}
@@ -311,7 +314,6 @@ static void timer_run(int signo, void *arg)
 			entry->expiry.tv_sec++;
 			entry->expiry.tv_nsec -= 1000000000;
 		}
-
 	}
 
 	timer_start(&now);
@@ -352,6 +354,45 @@ int pev_timer_add(int timeout, int period, void (*cb)(int, void *), void *arg)
 int pev_timer_del(int id)
 {
 	return pev_sock_del(id);
+}
+
+int pev_timer_set(int id, int timeout)
+{
+	struct pev *entry;
+
+	for (entry = pl; entry; entry = entry->next) {
+		if (entry->type != PEV_TIMER)
+			continue;
+		if (entry->id != id)
+			continue;
+
+		entry->timeout = timeout;
+		entry->active = 1;
+		return 0;
+	}
+
+	errno = ENOENT;
+	return -1;
+}
+
+int pev_timer_get(int id)
+{
+	struct pev *entry;
+
+	for (entry = pl; entry; entry = entry->next) {
+		if (entry->type != PEV_TIMER)
+			continue;
+		if (entry->id != id)
+			continue;
+
+		if (entry->timeout)
+			return entry->timeout;
+
+		return entry->period;
+	}
+
+	errno = ENOENT;
+	return -1;
 }
 
 /******************************* GENERIC ******************************/

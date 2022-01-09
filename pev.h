@@ -68,4 +68,16 @@ int pev_sock_close (int id);
 int pev_timer_add  (int timeout, int period, void (*cb)(int, void *), void *arg);
 int pev_timer_del  (int id);
 
+/*
+ * Reset timeout of one-shot timer.  When a one-shot timer has fired
+ * it goes inert.  Calling pev_timer_set() rearms the timer.
+ *
+ * An active timer has a non-zero timeout, this can be checked with
+ * the pev_timer_get() call.  This also applies to periodic timers,
+ * with the exception of the first initial timeout, the call always
+ * returns the period value.
+ */
+int pev_timer_set  (int id, int timeout);
+int pev_timer_get  (int id);
+
 #endif /* PEV_H_ */
