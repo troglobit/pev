@@ -36,10 +36,12 @@ Example
 
 #define TIMEOUT 500000      /* 0.5 sec */
 
+int id;
+
 static void cb(int timeout, void *arg)
 {
         printf("Hej %d\n", timeout);
-        pev_timer_add(timeout + TIMEOUT, 0, cb, NULL);
+        pev_timer_set(id, timeout + TIMEOUT);
 }
 
 static void br(int signo, void *arg)
@@ -51,7 +53,7 @@ int main(void)
 {
         pev_init();
         pev_sig_add(SIGINT, br, NULL);
-        pev_timer_add(TIMEOUT, 0, cb, NULL);
+        id = pev_timer_add(TIMEOUT, 0, cb, NULL);
 
         return pev_run();
 }
