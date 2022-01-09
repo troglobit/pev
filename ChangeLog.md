@@ -4,6 +4,14 @@ Change Log
 All relevant changes to the project are documented in this file.
 
 
+[v1.6][] - 2022-01-09
+---------------------
+
+### Changes
+  * Add support for resetting one-shot timers
+  * Simplify signal handling, no implicit masking
+
+
 [v1.5][] - 2022-01-06
 ---------------------
 
@@ -96,7 +104,8 @@ Initial release.
 Support for periodic timers, signals, and sockets/descriptors.
 
 
-[UNRELEASED]: https://github.com/troglobit/pev/compare/v1.4...HEAD
+[UNRELEASED]: https://github.com/troglobit/pev/compare/v1.6...HEAD
+[v1.6]: https://github.com/troglobit/pev/compare/v1.5...v1.6
 [v1.5]: https://github.com/troglobit/pev/compare/v1.4...v1.5
 [v1.4]: https://github.com/troglobit/pev/compare/v1.3...v1.4
 [v1.3]: https://github.com/troglobit/pev/compare/v1.2...v1.3
