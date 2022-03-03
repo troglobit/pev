@@ -59,7 +59,7 @@ int pev_sock_close (int id);
  *
  * For periodic timers, set period != 0.  The timeout may be set to
  * zero (timeout=0) for periodic tasks, this means the first call will
- * be after period milliseconds.  The timeout value is only used for
+ * be after period microseconds.  The timeout value is only used for
  * the first call.
  *
  * Please note, scheduling granularity is subject to limits in your
@@ -71,6 +71,8 @@ int pev_timer_del  (int id);
 /*
  * Reset timeout of one-shot timer.  When a one-shot timer has fired
  * it goes inert.  Calling pev_timer_set() rearms the timer.
+ *
+ * Remember, the timeout argument is in microseconds.
  *
  * An active timer has a non-zero timeout, this can be checked with
  * the pev_timer_get() call.  This also applies to periodic timers,
