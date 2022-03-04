@@ -367,7 +367,8 @@ int pev_timer_set(int id, int timeout)
 			continue;
 
 		entry->timeout = timeout;
-		entry->active = 1;
+		memset(&entry->expiry, 0, sizeof(entry->expiry));
+		entry->active = 2;
 		return 0;
 	}
 
