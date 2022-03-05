@@ -3,6 +3,14 @@ Change Log
 
 All relevant changes to the project are documented in this file.
 
+[v1.7][] - 2022-03-05
+---------------------
+
+### Fixes
+  * Fix problem with timers expiring with old timeout when having called
+    `pev_timer_set()` to reset them
+  * Update timer API description, timeout and period are in microseconds
+
 
 [v1.6][] - 2022-01-09
 ---------------------
