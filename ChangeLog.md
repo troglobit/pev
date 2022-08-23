@@ -3,6 +3,14 @@ Change Log
 
 All relevant changes to the project are documented in this file.
 
+[v1.8][] - 2022-08-23
+---------------------
+
+### Fixes
+  * Fix spurious timer triggers on Aarch6 (Arm64), or any arch where a
+    `char` is default unsigned.  Found and fixed by Tobias Waldekranz
+
+
 [v1.7][] - 2022-03-05
 ---------------------
 
@@ -112,7 +120,9 @@ Initial release.
 Support for periodic timers, signals, and sockets/descriptors.
 
 
-[UNRELEASED]: https://github.com/troglobit/pev/compare/v1.6...HEAD
+[UNRELEASED]: https://github.com/troglobit/pev/compare/v1.8...HEAD
+[v1.8]: https://github.com/troglobit/pev/compare/v1.7...v1.8
+[v1.7]: https://github.com/troglobit/pev/compare/v1.6...v1.7
 [v1.6]: https://github.com/troglobit/pev/compare/v1.5...v1.6
 [v1.5]: https://github.com/troglobit/pev/compare/v1.4...v1.5
 [v1.4]: https://github.com/troglobit/pev/compare/v1.3...v1.4
