@@ -35,6 +35,7 @@ struct pev {
 	};
 
 	void (*cb)(int, void *);
+	void (*cb_del)(void *);
 	void *arg;
 };
 
@@ -97,6 +98,21 @@ int pev_sig_del(int id)
 	return pev_sock_del(id);
 }
 
+int pev_sig_set_cb_del(int id, void (*cb)(void *))
+{
+	struct pev *entry;
+
+	entry = pev_find(PEV_SIG, id);
+	if (!entry) {
+		errno = ENOENT;
+		return -1;
+	}
+
+	entry->cb_del = cb;
+
+	return 0;
+}
+
 /******************************* SOCKETS ******************************/
 
 static int nfds(void)
@@ -157,6 +173,9 @@ int pev_sock_del(int id)
 			entry->active = 0;
 			sig_handler(0);
 
+			if (entry->cb_del)
+				entry->cb_del(entry->arg);
+
 			return 0;
 		}
 	}
@@ -198,6 +217,22 @@ int pev_sock_close(int sd)
 	close(sd);
 
 	return 0;
+}
+
+int pev_sock_set_cb_del(int id, void (*cb)(void *))
+{
+	struct pev *entry;
+
+	for (entry = pl; entry; entry = entry->next) {
+		if (entry->id == id) {
+			entry->cb_del = cb;
+
+			return 0;
+		}
+	}
+
+	errno = ENOENT;
+	return -1;
 }
 
 /******************************* TIMERS *******************************/
@@ -394,6 +429,11 @@ int pev_timer_get(int id)
 
 	errno = ENOENT;
 	return -1;
+}
+
+int pev_timer_set_cb_del(int id, void (*cb)(void *))
+{
+	return pev_sock_set_cb_del(id, cb);
 }
 
 /******************************* GENERIC ******************************/

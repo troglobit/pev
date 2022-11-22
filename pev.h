@@ -34,6 +34,12 @@ int pev_sig_add    (int signo, void (*cb)(int, void *), void *arg);
 int pev_sig_del    (int id);
 
 /*
+ * Destructor callback, called when deleting a signal event (pev_sig_del).
+ * Useful for deallocating heap allocated arg data.
+ */
+int pev_sig_set_cb_del  (int id, void (*cb)(void *));
+
+/*
  * Socket or file descriptor callback by sd/fd, only one callback per
  * descriptor.  API changes to CLOEXEC and NONBLOCK.  Delete by id
  * returned from pev_sock_add()
@@ -47,6 +53,12 @@ int pev_sock_del   (int id);
  */
 int pev_sock_open  (int domain, int type, int proto, void (*cb)(int, void *), void *arg);
 int pev_sock_close (int id);
+
+/*
+ * Destructor callback, called when deleting a socket event (pev_sock_del or
+ * pev_sock_close). Useful for deallocating heap allocated arg data.
+ */
+int pev_sock_set_cb_del  (int id, void (*cb)(void *));
 
 /*
  * Periodic timers use SIGALRM via setitimer() API, may affect use of
@@ -81,5 +93,11 @@ int pev_timer_del  (int id);
  */
 int pev_timer_set  (int id, int timeout);
 int pev_timer_get  (int id);
+
+/*
+ * Destructor callback, called when deleting a timer (pev_timer_del).
+ * Useful for deallocating heap allocated arg data.
+ */
+int pev_timer_set_cb_del  (int id, void (*cb)(void *));
 
 #endif /* PEV_H_ */
