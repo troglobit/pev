@@ -582,9 +582,10 @@ int pev_run(void)
 {
 	struct pev *entry, *next;
 	fd_set fds;
-	int num;
 
 	while (running) {
+		int num;
+
 		pev_check(&fds);
 
 		errno = 0;
