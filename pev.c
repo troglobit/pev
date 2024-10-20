@@ -30,6 +30,7 @@ struct pev {
 		struct {
 			int timeout;
 			int period;
+			int gettime;
 			struct timespec expiry;
 		};
 	};
@@ -336,8 +337,10 @@ static void timer_run(int signo, void *arg)
 
 		if (signo && entry->cb) {
 			entry->timeout = 0;
+			entry->gettime = timeout;
+			entry->cb(entry->id, entry->arg);
+			entry->gettime = 0;
 
-			entry->cb(timeout, entry->arg);
 			if (!entry->period && !entry->timeout) {
 				entry->active = -1;
 				continue;
@@ -424,6 +427,8 @@ int pev_timer_get(int id)
 		if (entry->id != id)
 			continue;
 
+		if (entry->gettime)
+			return entry->gettime;
 		if (entry->timeout)
 			return entry->timeout;
 

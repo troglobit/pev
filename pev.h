@@ -1,5 +1,18 @@
 /* This is free and unencumbered software released into the public domain. */
 
+/*
+ * All pev callback run in regular process context, even signal
+ * callbacks. All callbacks gets the socket, signal, or timer id,
+ * as the first argument, in addition to the optional argument.
+ *
+ *     static void signal_cb(int signo, void *arg);
+ *     static void socket_cb(int sd, void *arg);
+ *     static void timer_cb(int id, void *arg);
+ *
+ * NOTE: pev < v2.0 passed the timeout value as the first argument
+ *       to timer_cb().  Now the first arugment is the timer id.
+ */
+
 #ifndef PEV_H_
 #define PEV_H_
 
@@ -60,22 +73,32 @@ int pev_sock_close (int id);
  */
 int pev_sock_set_cb_del  (int id, void (*cb)(void *));
 
+
 /*
- * Periodic timers use SIGALRM via setitimer() API, may affect use of
- * sleep(), usleep(), and alarm() APIs.  See your respective OS for
- * details.  Otherwise it works like the other pev APIs, returns id.
- * The timeout and period arguments are in microseconds.
+ * TIMER API
  *
- * For one-shot timers, set perid = 0 and timeout to the delay before
+ * The scheduling granularity of timers is subject to limits in your
+ * operating system timer resolution.
+ *
+ * Periodic timers use SIGALRM via the POSIX setitimer() API, which
+ * may affect the use of sleep(), usleep(), and alarm() APIs in your
+ * application.  See your respective OS for details.
+ */
+
+/*
+ * Add or delete a timer.  When creating a new timer, the timeout and
+ * period arguments are in microseconds.  The callback used to get the
+ * timeout value as its first argument, but this was changed in v2.0 to
+ * instead pass the timer id so callback easily can do pev_timer_set().
+ * The timer id is also returned by the add function.
+ *
+ * For one-shot timers, set period = 0 and timeout to the delay before
  * the callback should be called.
  *
  * For periodic timers, set period != 0.  The timeout may be set to
  * zero (timeout=0) for periodic tasks, this means the first call will
  * be after period microseconds.  The timeout value is only used for
  * the first call.
- *
- * Please note, scheduling granularity is subject to limits in your
- * operating system timer resolution.
  */
 int pev_timer_add  (int timeout, int period, void (*cb)(int, void *), void *arg);
 int pev_timer_del  (int id);

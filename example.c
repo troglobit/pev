@@ -7,14 +7,20 @@
 #define TIMEOUT  500000		/* 0.5 sec */
 #define PERIOD  1000000		/* 1.0 sec */
 
-int id;
-
-static void cb(int timeout, void *arg)
+/*
+ * For each call, the timer is incremented with TIMEOUT
+ */
+static void cb(int id, void *arg)
 {
+	int timeout = pev_timer_get(id);
+
 	printf("Hej %d\n", timeout);
 	pev_timer_set(id, timeout + TIMEOUT);
 }
 
+/*
+ * Every one second
+ */
 static void periodic(int timeout, void *arg)
 {
 	puts("+++++++++");
@@ -27,13 +33,24 @@ static void br(int signo, void *arg)
 
 int main(void)
 {
+	int id1, id2, rc;
+
 	pev_init();
 	pev_sig_add(SIGINT, br, NULL);
 
-	pev_timer_add(0, PERIOD, periodic, NULL);
-	id = pev_timer_add(TIMEOUT, 0, cb, NULL);
+	id1 = pev_timer_add(0, PERIOD, periodic, NULL);
+	if (id1 < 0)
+		return 1;
 
-	return pev_run();
+	id2 = pev_timer_add(TIMEOUT, 0, cb, NULL);
+	if (id2 < 0)
+		return 1;
+
+	rc = pev_run();
+	pev_timer_del(id1);
+	pev_timer_del(id2);
+
+	return rc;
 }
 
 /**
