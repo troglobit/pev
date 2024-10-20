@@ -9,8 +9,11 @@ free for use in the [*public domain*](UNLICENSE).
 Upgrade Warnings
 ----------------
 
+Heads-up, breaking changes in these versions!
+
   * v1.3 changes timer resolution from 1 second to 1 microsecond
   * v1.5 changes timer API to add support for one-shot timers
+  * v2.0 timer callbacks now get `id` as first argument, not timeout
 
 See [ChangeLog](ChangeLog.md) for details.
 
