@@ -139,7 +139,8 @@ Initial release.
 Support for periodic timers, signals, and sockets/descriptors.
 
 
-[UNRELEASED]: https://github.com/troglobit/pev/compare/v1.8...HEAD
+[UNRELEASED]: https://github.com/troglobit/pev/compare/v2.0...HEAD
+[v2.0]: https://github.com/troglobit/pev/compare/v1.8...v2.0
 [v1.8]: https://github.com/troglobit/pev/compare/v1.7...v1.8
 [v1.7]: https://github.com/troglobit/pev/compare/v1.6...v1.7
 [v1.6]: https://github.com/troglobit/pev/compare/v1.5...v1.6
