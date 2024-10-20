@@ -1,6 +1,6 @@
 Portable Event Library (PEV)
 ============================
-[![License Badge][]][License] [![GitHub Status][]][GitHub]
+[![License Badge][]][License] [![GitHub Status][]][GitHub] [![Coverity Status][]][Coverity Scan]
 
 This is a small event library in C based around `select()` available
 free for use in the [*public domain*](UNLICENSE).
@@ -119,11 +119,13 @@ wrote for SMCRoute, cleaned up and now fully free in the public domain.
 Take care!  
  /Joachim :-)
 
-[1]: https://stackoverflow.com/questions/2328127/select-able-timers/6800676#6800676
-[SMCRoute]: https://github.com/troglobit/SMCRoute
-[GitHub issues]: https://github.com/troglobit/pev/issues
-[pull requests]: https://github.com/troglobit/pev/pulls
-[License]:       https://unlicense.org/
-[License Badge]: https://img.shields.io/badge/License-Unlicense-blue.svg
-[GitHub]:        https://github.com/troglobit/pev/actions/workflows/build.yml/
-[GitHub Status]: https://github.com/troglobit/pev/actions/workflows/build.yml/badge.svg
+[1]:               https://stackoverflow.com/questions/2328127/select-able-timers/6800676#6800676
+[SMCRoute]:        https://github.com/troglobit/SMCRoute
+[GitHub issues]:   https://github.com/troglobit/pev/issues
+[pull requests]:   https://github.com/troglobit/pev/pulls
+[License]:         https://unlicense.org/
+[License Badge]:   https://img.shields.io/badge/License-Unlicense-blue.svg
+[GitHub]:          https://github.com/troglobit/pev/actions/workflows/build.yml/
+[GitHub Status]:   https://github.com/troglobit/pev/actions/workflows/build.yml/badge.svg
+[Coverity Scan]:   https://scan.coverity.com/projects/30840
+[Coverity Status]: https://scan.coverity.com/projects/30840/badge.svg
