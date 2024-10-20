@@ -210,7 +210,7 @@ int pev_sock_open(int domain, int type, int proto, void (*cb)(int, void *), void
 
 int pev_sock_close(int sd)
 {
-	struct pev *entry;
+	const struct pev *entry;
 
 	entry = pev_find(PEV_SOCK, sd);
 	if (!entry)
@@ -267,7 +267,7 @@ static struct pev *timer_compare(struct pev *a, struct pev *b)
 	return b;
 }
 
-static int timer_start(struct timespec *now)
+static int timer_start(const struct timespec *now)
 {
 	struct itimerval it = { 0 };
 	struct pev *next, *entry;
@@ -295,7 +295,7 @@ static int timer_start(struct timespec *now)
 	return setitimer(ITIMER_REAL, &it, NULL);
 }
 
-static int timer_expired(struct pev *entry, struct timespec *now)
+static int timer_expired(const struct pev *entry, const struct timespec *now)
 {
 	if (entry->type != PEV_TIMER || entry->active < 1)
 		return 0;
