@@ -3,6 +3,25 @@ Change Log
 
 All relevant changes to the project are documented in this file.
 
+
+[v2.0][] - 2024-10-20
+---------------------
+
+**News:** breaking ABI change, timer callbacks are now passed the timer
+id as the first argument instead of the timeout value.
+
+### Changes
+  * Timer callbacks are now passed the timer id as their first argument,
+    instead of the timeout value.  This to allow callbacks an easy way
+    to call `pev_timer_set()`
+  * Add optional destructor callback for private socket, signal, and
+    timer data, by Jacques de Laval, Westermo
+
+### Fixes
+  * The first argument to `select()` can now handle users calling
+    `pev_sock_del()`.  May fix issues seen in this use-case
+
+
 [v1.8][] - 2022-08-23
 ---------------------
 
