@@ -123,14 +123,21 @@ static int nfds(void)
 static void sock_run(fd_set *fds)
 {
 	struct pev *entry;
+	int fdmax = 0;
 
 	FD_ZERO(fds);
 	for (entry = pl; entry; entry = entry->next) {
 		if (entry->type != PEV_SOCK)
 			continue;
 
+		if (entry->sd > fdmax)
+			fdmax = entry->sd;
+
 		FD_SET(entry->sd, fds);
 	}
+
+	if (fdmax)
+		max_fdnum = fdmax;
 }
 
 int pev_sock_add(int sd, void (*cb)(int, void *), void *arg)
@@ -155,10 +162,6 @@ int pev_sock_add(int sd, void (*cb)(int, void *), void *arg)
 		return -1;
 
 	entry->sd = sd;
-
-	/* Keep track for select() */
-	if (sd > max_fdnum)
-		max_fdnum = sd;
 
 	return entry->id;
 }
