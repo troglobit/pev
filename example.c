@@ -21,7 +21,7 @@ static void cb(int id, void *arg)
 /*
  * Every one second
  */
-static void periodic(int timeout, void *arg)
+static void periodic(int id, void *arg)
 {
 	puts("+++++++++");
 }
