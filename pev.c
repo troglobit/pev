@@ -28,9 +28,9 @@ struct pev {
 		int sd;
 		int signo;
 		struct {
-			int timeout;
-			int period;
-			int gettime;
+			int64_t timeout;
+			int64_t period;
+			int64_t gettime;
 			struct timespec expiry;
 		};
 	};
@@ -320,8 +320,7 @@ static void timer_run(int signo, void *arg)
 	clock_gettime(CLOCK_MONOTONIC, &now);
 
 	for (entry = pl; entry; entry = next) {
-		unsigned int sec, usec;
-		int timeout;
+		int64_t timeout;
 
 		next = entry->next;
 		if (entry->type != PEV_TIMER)
@@ -347,10 +346,8 @@ static void timer_run(int signo, void *arg)
 			}
 		}
 
-		sec  = timeout / 1000000;
-		usec = timeout % 1000000;
-		entry->expiry.tv_sec  = now.tv_sec + sec;
-		entry->expiry.tv_nsec = now.tv_nsec + (usec * 1000);
+		entry->expiry.tv_sec  = now.tv_sec + timeout / 1000000;
+		entry->expiry.tv_nsec = now.tv_nsec + (timeout % 1000000) * 1000;
 		if (entry->expiry.tv_nsec > 1000000000) {
 			entry->expiry.tv_sec++;
 			entry->expiry.tv_nsec -= 1000000000;
@@ -372,7 +369,7 @@ static int timer_exit(void)
 	return setitimer(ITIMER_REAL, &it, NULL);
 }
 
-int pev_timer_add(int timeout, int period, void (*cb)(int, void *), void *arg)
+int pev_timer_add(int64_t timeout, int64_t period, void (*cb)(int, void *), void *arg)
 {
 	struct pev *entry;
 
@@ -397,7 +394,7 @@ int pev_timer_del(int id)
 	return pev_sock_del(id);
 }
 
-int pev_timer_set(int id, int timeout)
+int pev_timer_set(int id, int64_t timeout)
 {
 	struct pev *entry;
 
@@ -417,7 +414,7 @@ int pev_timer_set(int id, int timeout)
 	return -1;
 }
 
-int pev_timer_get(int id)
+int64_t pev_timer_get(int id)
 {
 	struct pev *entry;
 

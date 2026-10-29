@@ -1,5 +1,6 @@
 /* This is free and unencumbered software released into the public domain. */
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <signal.h>
 #include "pev.h"
@@ -12,9 +13,9 @@
  */
 static void cb(int id, void *arg)
 {
-	int timeout = pev_timer_get(id);
+	int64_t timeout = pev_timer_get(id);
 
-	printf("Hej %d\n", timeout);
+	printf("Hej %" PRId64 "\n", timeout);
 	pev_timer_set(id, timeout + TIMEOUT);
 }
 

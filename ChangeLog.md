@@ -4,6 +4,18 @@ Change Log
 All relevant changes to the project are documented in this file.
 
 
+[UNRELEASED][]
+--------------
+
+**News:** breaking ABI change, timer timeouts and periods are now 64-bit.
+
+### Changes
+  * Timer timeout and period arguments, and the return value of
+    `pev_timer_get()`, are now `int64_t`.  Deadlines longer than
+    35 minutes (`INT_MAX` microseconds) no longer overflow.  Found
+    and fixed by omrzk, mcjoin issue #42
+
+
 [v2.0][] - 2024-10-20
 ---------------------
 

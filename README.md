@@ -33,17 +33,18 @@ Example
 -------
 
 ```C
+#include <inttypes.h>
 #include <stdio.h>
 #include <signal.h>
 #include "pev.h"
 
 #define TIMEOUT 500000      /* 0.5 sec */
 
-int id;
-
-static void cb(int timeout, void *arg)
+static void cb(int id, void *arg)
 {
-        printf("Hej %d\n", timeout);
+        int64_t timeout = pev_timer_get(id);
+
+        printf("Hej %" PRId64 "\n", timeout);
         pev_timer_set(id, timeout + TIMEOUT);
 }
 
@@ -56,7 +57,7 @@ int main(void)
 {
         pev_init();
         pev_sig_add(SIGINT, br, NULL);
-        id = pev_timer_add(TIMEOUT, 0, cb, NULL);
+        pev_timer_add(TIMEOUT, 0, cb, NULL);
 
         return pev_run();
 }
