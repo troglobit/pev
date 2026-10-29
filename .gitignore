@@ -2,6 +2,7 @@
 *.o
 demo
 example
+timer-test
 libpev.a
 .gdb_history
 GPATH

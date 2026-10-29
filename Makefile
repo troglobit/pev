@@ -11,6 +11,7 @@ RM    	 = rm -f
 INSTALL  = install
 
 EXEC   	 = demo example
+TEST     = timer-test
 
 LIB    	 = libpev.a
 CFLAGS  += -W -Wall -Wextra -Wno-unused-parameter
@@ -21,7 +22,12 @@ DOCFILES = README.md UNLICENSE
 
 all: $(EXEC)
 
-$(EXEC): $(LIB)
+.PHONY: all check install uninstall clean distclean dist
+
+$(EXEC) $(TEST): $(LIB)
+
+check: $(TEST)
+	./$(TEST)
 
 $(LIB): $(LIBOBJS)
 	$(AR) $(ARFLAGS) $@ $(LIBOBJS)
@@ -42,7 +48,7 @@ uninstall:
 	-$(RM) -r $(DESTDIR)$(docdir)
 
 clean:
-	$(RM) *.o $(LIB) demo
+	$(RM) *.o $(LIB) $(EXEC) $(TEST)
 
 distclean: clean
 	$(RM) *~ GPATH GRTAGS GTAGS ID

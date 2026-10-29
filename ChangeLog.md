@@ -14,6 +14,7 @@ All relevant changes to the project are documented in this file.
     `pev_timer_get()`, are now `int64_t`.  Deadlines longer than
     35 minutes (`INT_MAX` microseconds) no longer overflow.  Found
     and fixed by omrzk, mcjoin issue #42
+  * Add timer test, `make check`
 
 
 [v2.0][] - 2024-10-20
